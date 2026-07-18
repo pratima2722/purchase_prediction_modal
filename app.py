@@ -5,9 +5,8 @@ from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
 
-# Load the pickle model
-# Note: Ensure the model file is named 'naive_model_pkl' in your repository
-MODEL_PATH = "naive_model_pkl"
+# FIX: Changed 'naive_model_pkl' to 'naive_model.pkl' to match your repository file name
+MODEL_PATH = "naive_model.pkl"
 with open(MODEL_PATH, "rb") as f:
     model = pickle.load(f)
 
@@ -18,7 +17,7 @@ HTML_LAYOUT = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Naive Bayes Prediction System</title>
+    <title>Purchase Prediction Dashboard</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -167,12 +166,12 @@ HTML_LAYOUT = """
             <input type="number" id="salary" name="salary" placeholder="Enter estimated salary" min="0" required>
         </div>
 
-        <button type="submit">Predict</button>
+        <button type="submit">Predict Purchase Intent</button>
     </form>
 
     {% if prediction is not none %}
     <div class="result-box">
-        <h3>Class Prediction Output: {{ prediction }}</h3>
+        <h3>Prediction Output: {{ prediction }}</h3>
     </div>
     {% endif %}
 </div>
@@ -186,15 +185,15 @@ def home():
     prediction = None
     if request.method == "POST":
         try:
-            # Gather individual form values
+            # Extract numerical features
             gender = float(request.form.get("gender"))
             age = float(request.form.get("age"))
             salary = float(request.form.get("salary"))
             
-            # Format as standard 2D array matrix for the model
+            # Format inputs for scikit-learn
             features = np.array([[gender, age, salary]])
             
-            # Run inference
+            # Predict
             pred_output = model.predict(features)[0]
             prediction = int(pred_output)
             
@@ -204,6 +203,5 @@ def home():
     return render_template_string(HTML_LAYOUT, prediction=prediction)
 
 if __name__ == "__main__":
-    # Render binds dynamically to an environment port
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
